@@ -1,0 +1,393 @@
+@import "tailwindcss";
+
+/* `dark:` utilities follow the data-theme attribute set on <html>. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  /* ---- Palette: cream / espresso / ruby / gold (the brand colours) ---- */
+  --color-ink: #1f1415;
+  --color-ink-soft: #3b2a2b;
+  --color-slate-body: #66544f;
+  --color-muted: #85736d;
+
+  --color-brand-50: #fff1ef;
+  --color-brand-100: #ffdfdb;
+  --color-brand-200: #ffbeb7;
+  --color-brand-300: #ff938b;
+  --color-brand-400: #f2635e;
+  --color-brand-500: #dc3b40;
+  --color-brand-600: #c42a35;
+  --color-brand-700: #a31f2c;
+  --color-brand-800: #7f1a26;
+  --color-brand-900: #5a1320;
+
+  --color-gold-200: #ffeaa6;
+  --color-gold-300: #ffd96b;
+  --color-gold-400: #f7c548;
+  --color-gold-500: #f2b630;
+  --color-gold-600: #d99a14;
+
+  --color-mist-50: #fffcf6;
+  --color-mist-100: #fff6e8;
+  --color-mist-200: #f6e9d3;
+  --color-mist-300: #ecd9b8;
+  --color-mist-400: #d9c29a;
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+
+  --radius-4xl: 2rem;
+  --radius-5xl: 2.75rem;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-smooth: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+:root {
+  --page-bg: #fff8ee;
+  --surface: #fffdf8;
+  --panel-dark: #1f1415;
+  --dot: rgba(31, 20, 21, 0.1);
+  --nav-h: 78px;
+}
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: auto;
+  /* Safety net: no page should ever scroll sideways on a phone. */
+  overflow-x: clip;
+}
+
+body {
+  background-color: var(--page-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  transition: background-color 0.7s var(--ease-smooth);
+  /* No overflow-x here on purpose: html's overflow-x:clip above already
+     stops horizontal scroll site-wide. Setting only overflow-x on body
+     (with overflow-y left at its default) makes the browser compute the
+     other axis to "auto" per spec, which turns body into its own scroll
+     container — separate from the window/documentElement every sticky
+     element, scroll listener, and IntersectionObserver here assumes. Body
+     never actually scrolls in that state, so it just quietly breaks every
+     position:sticky sidebar on the site instead of doing anything useful. */
+}
+
+/* Lenis */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-brand-500);
+  color: #fff;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-mist-100);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-mist-400);
+  border-radius: 999px;
+  border: 3px solid var(--color-mist-100);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-300);
+}
+
+@layer utilities {
+  /* Cel-shaded "paper" surfaces: flat fills, a confident ink outline and a
+     hard offset shadow, like a manga panel. Class names are kept from the
+     old glass system so every existing component picks the new look up. */
+  .glass {
+    background: color-mix(in srgb, var(--page-bg) 88%, transparent);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border: 2px solid var(--color-ink);
+    box-shadow: 0 3px 0 0 var(--color-ink);
+  }
+
+  .glass-strong {
+    background: var(--surface);
+    border: 2px solid var(--color-ink);
+    box-shadow: 0 3px 0 0 var(--color-ink);
+  }
+
+  .glass-card {
+    background: var(--surface);
+    border: 2px solid var(--color-ink);
+    box-shadow: 4px 5px 0 0 var(--color-gold-400);
+  }
+
+  /* Fully opaque on purpose — see the nav mega menu, which sits inside a
+     backdrop-filter parent and would otherwise leak the page behind it. */
+  .glass-panel {
+    background: var(--surface);
+    border: 2px solid var(--color-ink);
+    box-shadow: 6px 7px 0 0 var(--color-ink);
+  }
+
+  /* PixelDisintegrate hands the headline over to a canvas while its pixels are
+     in motion. Only opacity changes, so layout (and the h1's box) is stable. */
+  .pixel-host[data-pixel="on"] > .pixel-content {
+    opacity: 0;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Hides the scrollbar on horizontally-scrollable chip strips (mobile
+     section nav) while keeping the element genuinely scrollable. */
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .display {
+    font-family: var(--font-display), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+    /* 1.06, not the old 0.98: a line-height tighter than the font's natural
+       ascent+descent (~1.2em) forces descenders to paint outside the line
+       box, which is what kept clipping "g" in animated headlines. */
+    line-height: 1.06;
+    font-weight: 900;
+  }
+
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background-image: radial-gradient(
+      circle at 1px 1px,
+      rgba(31, 20, 21, 0.08) 1px,
+      transparent 0
+    );
+    background-size: 22px 22px;
+    mask-image: radial-gradient(ellipse at center, #000 10%, transparent 72%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  /* Motion's reducedMotion setting disables transforms but still animates
+     clip-path, so the wipe reveal has to be switched off here. */
+  .reveal-wipe {
+    clip-path: none !important;
+  }
+}
+
+
+/* ---- Anime / casino decoration ---------------------------------------- */
+@keyframes floaty {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-14px) rotate(calc(var(--r, 0deg) + 6deg)); }
+}
+@keyframes nudge {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+@layer utilities {
+  .float-slow { animation: floaty 7s ease-in-out infinite; }
+  .float-slower { animation: floaty 10s ease-in-out infinite reverse; }
+  .nudge { animation: nudge 1.6s ease-in-out infinite; }
+
+  .halftone {
+    background-image: radial-gradient(circle at 1px 1px, var(--dot) 1.2px, transparent 0);
+    background-size: 16px 16px;
+  }
+  .sunburst {
+    background: repeating-conic-gradient(from 0deg, rgba(244, 185, 40, 0.3) 0 5deg, transparent 5deg 12deg);
+    -webkit-mask-image: radial-gradient(circle, #000 12%, transparent 68%);
+    mask-image: radial-gradient(circle, #000 12%, transparent 68%);
+  }
+  .sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 2px solid var(--color-ink);
+    background: var(--color-gold-400);
+    color: var(--color-ink);
+    border-radius: 999px;
+    padding: 0.35rem 0.95rem;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    box-shadow: 2px 3px 0 0 var(--color-ink);
+  }
+  /* Panel-style section divider, like a manga gutter. */
+  .gutter-top::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 10px;
+    background: repeating-linear-gradient(-45deg, var(--color-ink) 0 6px, transparent 6px 14px);
+    opacity: 0.9;
+  }
+}
+
+/* Custom spade cursor replaces the system pointer (except in form fields). */
+html.spade-cursor,
+html.spade-cursor *:not(input):not(textarea):not(select) {
+  cursor: none !important;
+}
+
+
+/* ======================================================================
+   Dark theme — "after hours at the casino".
+   Semantic tokens flip, so everything built on ink / mist / brand follows.
+   ====================================================================== */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --page-bg: #150d0e;
+  --surface: #231a1b;
+  --panel-dark: #0b0607;
+  --dot: rgba(255, 240, 220, 0.07);
+
+  --color-ink: #f6ebdc;
+  --color-ink-soft: #e6d7c4;
+  --color-slate-body: #cbb9a9;
+  --color-muted: #9f8f83;
+
+  --color-mist-50: #1b1213;
+  --color-mist-100: #1f1516;
+  --color-mist-200: #36282a;
+  --color-mist-300: #4a3a3b;
+  --color-mist-400: #6b5651;
+
+  --color-brand-50: #2d1316;
+  --color-brand-100: #3b161b;
+  --color-brand-200: #5a1f27;
+  --color-brand-500: #ee5a60;
+  --color-brand-600: #dd444b;
+  --color-brand-700: #f2676c;
+  --color-brand-800: #c93a43;
+  --color-brand-900: #8f2531;
+
+  --color-gold-200: #4a3a16;
+}
+
+/* Surfaces that were literal white */
+html[data-theme="dark"] .bg-white { background-color: var(--surface); }
+html[data-theme="dark"] .bg-white\/60 { background-color: rgb(35 26 27 / 0.6); }
+html[data-theme="dark"] .bg-white\/70 { background-color: rgb(35 26 27 / 0.7); }
+html[data-theme="dark"] .bg-white\/80 { background-color: rgb(35 26 27 / 0.8); }
+html[data-theme="dark"] .bg-white\/90 { background-color: rgb(35 26 27 / 0.9); }
+html[data-theme="dark"] .bg-white\/92 { background-color: rgb(35 26 27 / 0.92); }
+html[data-theme="dark"] .bg-white\/95 { background-color: rgb(35 26 27 / 0.95); }
+html[data-theme="dark"] .hover\:bg-white:hover { background-color: #2d2122; }
+
+/* Panels that were solid "ink" are now the deepest layer, still with light text */
+html[data-theme="dark"] .bg-ink { background-color: #0b0607; color: #fff; }
+html[data-theme="dark"] .bg-ink .text-ink { color: #fff; }
+
+/* Anything sitting on gold keeps dark text in both themes */
+html[data-theme="dark"] .bg-gold-400,
+html[data-theme="dark"] .bg-gold-300,
+html[data-theme="dark"] .sticker { color: #1f1415; }
+
+html[data-theme="dark"] ::selection { color: #1f1415; background: var(--color-gold-400); }
+html[data-theme="dark"] body { transition: background-color 0.4s var(--ease-smooth), color 0.4s; }
+
+/* Gradients that fade into "white" should fade into the dark page instead */
+html[data-theme="dark"] .from-white { --tw-gradient-from: var(--page-bg); }
+html[data-theme="dark"] .via-white { --tw-gradient-via: var(--page-bg); }
+html[data-theme="dark"] .to-white { --tw-gradient-to: var(--page-bg); }
+
+/* ---- Poker illustrations ------------------------------------------------ */
+@keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes twinkle { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+@keyframes neon-pulse { 0%, 100% { opacity: 1; filter: drop-shadow(0 0 3px rgba(255, 217, 94, 0.9)); } 50% { opacity: 0.82; filter: drop-shadow(0 0 9px rgba(255, 217, 94, 1)); } }
+@keyframes door-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.86; } }
+@keyframes coin-flip { 0%, 100% { transform: scaleX(1); } 25% { transform: scaleX(0.55); } 50% { transform: scaleX(0.04); } 75% { transform: scaleX(0.55); } }
+@keyframes coin-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+@keyframes chip-hop { 0%, 72%, 100% { transform: translateY(0) rotate(0); } 82% { transform: translateY(-38px) rotate(-6deg); } 92% { transform: translateY(0) rotate(0); } }
+@keyframes spark { 0%, 100% { transform: scale(0.5) rotate(0); opacity: 0.3; } 50% { transform: scale(1) rotate(45deg); opacity: 1; } }
+@keyframes deal-in {
+  0% { opacity: 0; transform: translateY(-70px) rotate(-14deg) scaleX(0.2); }
+  55% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) rotate(0) scaleX(1); }
+}
+@keyframes chip-toss {
+  0%, 60% { transform: translate(0, 0) rotate(0); opacity: 0; }
+  62% { opacity: 1; }
+  78% { transform: translate(-6px, -46px) rotate(120deg); opacity: 1; }
+  92%, 100% { transform: translate(-12px, 6px) rotate(240deg); opacity: 1; }
+}
+
+svg .spin-slow, svg .spark, svg .coin-flip, svg .coin-bob, svg .chip-hop, svg .chip-toss, svg .door, svg .door-spill {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.spin-slow { animation: spin-slow 80s linear infinite; }
+.bulb { animation: twinkle 1.2s ease-in-out infinite; }
+.neon, .neon-text { animation: neon-pulse 2.4s ease-in-out infinite; }
+.door-glow { animation: door-glow 3s ease-in-out infinite; }
+.coin-flip { animation: coin-flip 2.6s ease-in-out infinite; }
+.coin-bob { animation: coin-bob 3.2s ease-in-out infinite; }
+.coin-shadow { transform-box: fill-box; transform-origin: center; animation: coin-bob 3.2s ease-in-out infinite reverse; }
+.spark { animation: spark 2.8s ease-in-out infinite; }
+.chip-toss { animation: chip-toss 5s ease-in-out infinite; }
+
+/* Casino entrance: the doors swing open when you hover the scene. */
+.ent .door { transition: transform 0.7s var(--ease-out-expo); }
+.ent .door-l { transform-origin: left center; }
+.ent .door-r { transform-origin: right center; }
+.ent:hover .door-l, .ent:hover .door-r { transform: scaleX(0.34); }
+.ent .door-spill { transition: opacity 0.7s; }
+.ent:hover .door-spill { opacity: 0.35; }
+
+/* Cards deal in when their InView wrapper flips to data-in="true". */
+[data-in] .deal { opacity: 0; transform-box: fill-box; transform-origin: center; }
+[data-in="true"] .deal { animation: deal-in 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both; animation-delay: var(--d, 0s); }
+.chip-hop-wrap { transform-box: fill-box; }
+
+/* Card fan spreads on hover */
+.card-fan .fan-card {
+  transform: rotate(var(--a, 0deg));
+  transition: transform 0.55s var(--ease-out-expo);
+  transition-delay: calc(var(--i, 0) * 25ms);
+}
+.card-fan:hover .fan-card { transform: rotate(var(--a2, 0deg)); }
+
+/* Chips fall one after another; the per-chip keyframes are generated in ChipsScene. */
+.chip-fall {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation-duration: 11s;
+  animation-iteration-count: infinite;
+  animation-timing-function: linear;
+  animation-fill-mode: both;
+}
